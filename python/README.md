@@ -74,18 +74,6 @@ log.info("Starting dicom-to-fhir mapping job.")
 }
 ```
 
-# UME Logging (`umelogging-ume`)
-
-Uniform JSON logging for **University Medicine Essen** applications.  
-Provides a **drop-in, one-line configuration** for structured logs, consistent across all UME services, with:
-
-- JSON log output (Docker/K8s/ELK friendly)
-- App/env/service/request context injection
-- PII scrubbing (emails, numeric IDs, phone numbers)
-- OpenTelemetry trace/span IDs in logs
-- Optional log→OTel span event bridge
-- FastAPI middleware for request/response logging
-
 ---
 
 ## 📦 Install
@@ -180,4 +168,4 @@ See [OpenTelemetry Docs](https://opentelemetry.io/docs/) for advanced setup.
 ## 📄 License
 
 MIT License.  
-Copyright © University Medicine Essen IT / Radiology.
+Copyright © University Medicine Essen ZIT / IKIM.

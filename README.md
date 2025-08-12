@@ -1,0 +1,1 @@
+## Uniform JSON logging for University Medicine Essen applications. 
