@@ -7,18 +7,21 @@
   <a href="https://pypi.org/project/logging-ume/">
     <img alt="Python Versions" src="https://img.shields.io/pypi/pyversions/logging-ume">
   </a>
-  <a href="https://https://github.com/UMEssen/ume-logging/blob/main/LICENSE">
+  <a href="https://github.com/UMEssen/ume-logging/blob/main/LICENSE">
     <img alt="License" src="https://img.shields.io/github/license/ume-uni-essen/ume-logging">
   </a>
   <!-- Optionally add CI badge:
-  <a href="https://https://github.com/UMEssen/ume-logging/actions">
-    <img alt="CI" src="https://https://github.com/UMEssen/ume-logging/actions/workflows/ci.yml/badge.svg">
+  <a href="https://github.com/UMEssen/ume-logging/actions">
+    <img alt="CI" src="https://github.com/UMEssen/ume-logging/actions/workflows/ci.yml/badge.svg">
   </a>
   -->
 </p>
 
 Uniform JSON logging for **University Medicine Essen** applications.  
-Provides a **drop-in, one-line configuration** for structured logs, consistent across all UME services, with:
+
+---
+
+## Features
 
 - JSON log output (Docker/K8s/ELK friendly)
 - App/env/service/request context injection
@@ -30,15 +33,7 @@ Provides a **drop-in, one-line configuration** for structured logs, consistent a
 
 ---
 
-<details>
-<summary><strong>Logging Pipeline</strong></summary>
-
-<pre>
-App → umelogging JSON Formatter → stdout → ELK / OTEL
-</pre>
-</details>
-
-## 📦 Install
+## 📦 Installation
 
 ```bash
 pip install logging-ume
@@ -46,6 +41,8 @@ pip install logging-ume
 pip install "logging-ume[fastapi]"   # FastAPI request logging middleware
 pip install "logging-ume[otel]"      # OpenTelemetry tracing + span events
 ```
+
+---
 
 ## 🚀 Quickstart
 
@@ -76,54 +73,19 @@ log.info("Starting dicom-to-fhir mapping job.")
 
 ---
 
-## 📦 Install
-
-```bash
-pip install umelogging-ume
-# Optional extras:
-pip install "umelogging-ume[fastapi]"   # FastAPI request logging middleware
-pip install "umelogging-ume[otel]"      # OpenTelemetry tracing + span events
-```
-
-## 🚀 Quickstart
-
-```python
-import logging
-from umelogging import log_configure
-
-log_configure("INFO", app="dicom2fhir", env="prod", service="mapping")
-log = logging.getLogger(__name__)
-
-log.info("Starting dicom-to-fhir mapping job.")
-```
-
-### Output (JSON):
-
-```json
-{
-  "time": "2025-08-12T12:01:23.456Z",
-  "level": "INFO",
-  "logger": "myapp",
-  "message": "Starting dicom-to-fhir mapping job.",
-  "org": "UME",
-  "app": "dicom2fhir",
-  "env": "prod",
-  "service": "mapping"
-}
-```
-
 ## ⚙️ Environment Variables
 
-| Variable          | Description                          | Default  |
-|-------------------|----------------------------------|----------|
-| UME_LOG_LEVEL     | Logging level                     | INFO     |
-| UME_APP           | App name                         |          |
-| UME_ENV           | Environment (prod, dev, test)    | prod     |
-| UME_SERVICE       | Service name                    |          |
-| UME_COMPONENT     | Component/module name           |          |
-| UME_USER_HASH_SALT| Salt for user ID hashing        | ume      |
-| UME_OTEL_SPAN_EVENTS | Mirror logs as OTel span events | false    |
+| Variable                | Description                          | Default  |
+|-------------------------|--------------------------------------|----------|
+| `UME_LOG_LEVEL`         | Logging level                       | `INFO`   |
+| `UME_APP`               | App name                            |          |
+| `UME_ENV`               | Environment (prod, dev, test)       | `prod`   |
+| `UME_SERVICE`           | Service name                        |          |
+| `UME_COMPONENT`         | Component/module name               |          |
+| `UME_USER_HASH_SALT`    | Salt for user ID hashing            | `ume`    |
+| `UME_OTEL_SPAN_EVENTS`  | Mirror logs as OTel span events     | `false`  |
 
+---
 
 ## 🌐 FastAPI Integration (optional)
 
@@ -138,6 +100,8 @@ app.add_middleware(UMELoggingMiddleware)
 ```
 
 This will log incoming requests and responses in JSON, including request ID, latency, status, and correlation information.
+
+---
 
 ## 📈 OpenTelemetry Integration (optional)
 
@@ -157,13 +121,15 @@ log_configure(
 
 Configure via environment variables:
 
-| Variable                | Description                       | Example             |
-|-------------------------|-----------------------------------|---------------------|
-| UMELOG_OTEL_ENABLE      | Enable OTel tracing/log bridge    | true                |
-| UMELOG_OTEL_EXPORTER    | OTel exporter ("otlp", "console") | otlp                |
-| OTEL_EXPORTER_OTLP_ENDPOINT | OTel collector endpoint        | http://otel:4317    |
+| Variable                     | Description                       | Example             |
+|------------------------------|-----------------------------------|---------------------|
+| `UMELOG_OTEL_ENABLE`         | Enable OTel tracing/log bridge    | `true`              |
+| `UMELOG_OTEL_EXPORTER`       | OTel exporter ("otlp", "console") | `otlp`             |
+| `OTEL_EXPORTER_OTLP_ENDPOINT`| OTel collector endpoint           | `http://otel:4317`  |
 
 See [OpenTelemetry Docs](https://opentelemetry.io/docs/) for advanced setup.
+
+---
 
 ## 📄 License
 
