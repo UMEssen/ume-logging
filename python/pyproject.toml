@@ -5,11 +5,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ume-logging"
-version = "0.0.11"
+version = "0.0.12"
 description = "Uniform JSON logging for University Medicine Essen (UME)"
-readme = "README.md"
-authors = [{ name = "UME IT / IKIM", email = "felix.nensa@uk-essen.de" }]
-license = { text = "MIT" }
+readme = {file = "README.md", content-type = "text/markdown"}
+license-files = ["LICENSE"]
+authors = [{name = "Felix Nensa", email = "felix.nensa@uk-essen.de"}]
 requires-python = ">=3.9"
 dependencies = [
   "python-dateutil>=2.8.2",
@@ -20,5 +20,5 @@ optional-dependencies = { fastapi = ["fastapi>=0.110"], otel = ["opentelemetry-a
 [project.urls]
 Homepage = "https://pypi.org/project/ume-logging/"
 
-[tool.setuptools]
-packages = ["fastapi", "otel"]
+[tool.setuptools.packages]
+find = { where = ["umelogging"] }
