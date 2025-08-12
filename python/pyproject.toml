@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ume-logging"
-version = "0.0.12"
+version = "0.0.13"
 description = "Uniform JSON logging for University Medicine Essen (UME)"
 readme = {file = "README.md", content-type = "text/markdown"}
 license-files = ["LICENSE"]
@@ -20,5 +20,6 @@ optional-dependencies = { fastapi = ["fastapi>=0.110"], otel = ["opentelemetry-a
 [project.urls]
 Homepage = "https://pypi.org/project/ume-logging/"
 
-[tool.setuptools.packages]
-find = { where = ["umelogging"] }
+[tool.setuptools.packages.find]
+where = ["."]               # scan the project root
+include = ["umelogging*"]
