@@ -8,7 +8,7 @@
     <img alt="Python Versions" src="https://img.shields.io/pypi/pyversions/logging-ume">
   </a>
   <a href="https://github.com/UMEssen/ume-logging/blob/main/LICENSE">
-    <img alt="License" src="https://img.shields.io/github/license/ume-uni-essen/ume-logging">
+    <img alt="License" src="https://img.shields.io/github/license/UMEssen/ume-logging">
   </a>
   <!-- Optionally add CI badge:
   <a href="https://github.com/UMEssen/ume-logging/actions">
