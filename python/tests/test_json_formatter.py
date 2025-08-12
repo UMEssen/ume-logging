@@ -1,6 +1,6 @@
 import unittest
 import logging
-from python.formatter import JsonFormatter  # Replace with actual import path
+from formatter import JsonFormatter  # Replace with actual import path
 
 class TestJsonFormatter(unittest.TestCase):
 
