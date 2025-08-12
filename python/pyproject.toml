@@ -1,0 +1,21 @@
+# pyproject.toml
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ume-logging"
+version = "0.1.0"
+description = "Uniform JSON logging for University Medicine Essen (UME)"
+readme = "README.md"
+authors = [{ name = "UME IT / IKIM", email = "felix.nensa@uk-essen.de" }]
+license = { text = "MIT" }
+requires-python = ">=3.9"
+dependencies = [
+  "python-dateutil>=2.8.2",
+  "pytz>=2024.1"
+]
+optional-dependencies = { fastapi = ["fastapi>=0.110"], otel = ["opentelemetry-api>=1.25.0"] }
+
+[project.urls]
+Homepage = "https://pypi.org/project/ume-logging/"
