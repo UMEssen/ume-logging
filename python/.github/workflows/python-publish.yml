@@ -73,11 +73,11 @@ jobs:
     environment:
       name: pypi
       # include your PyPI project URL in the deployment status:
-      #url: https://pypi.org/p/dicom2fhir
+      #url: https://pypi.org/p/logging-ume
       #
       # ALTERNATIVE: if your GitHub Release name is the PyPI project version string
       # ALTERNATIVE: exactly, uncomment the following line instead:
-      url: https://pypi.org/project/dicom2fhir/${{ github.event.release.name }}
+      url: https://pypi.org/project/logging-ume/${{ github.event.release.name }}
 
     steps:
       - name: Retrieve release distributions
