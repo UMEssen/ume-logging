@@ -2,9 +2,9 @@
 
 import logging, os, sys
 from typing import Optional, Dict, Any, List
-from formatter import JsonFormatter
-from filters import PiiScrubberFilter
-from context import set_context
+from .formatter import JsonFormatter
+from .filters import PiiScrubberFilter
+from .context import set_context
 
 _UVICORN_LOGGERS = ("uvicorn", "uvicorn.error", "uvicorn.access")
 

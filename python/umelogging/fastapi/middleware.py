@@ -4,7 +4,7 @@ from typing import Callable
 import time, uuid, logging
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
-from context import with_request_id, update_context
+from ..context import with_request_id, update_context
 
 class UMERequestLoggerMiddleware(BaseHTTPMiddleware):
     def __init__(self, app, *, request_id_header: str = "X-Request-ID"):
