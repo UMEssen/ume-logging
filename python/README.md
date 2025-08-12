@@ -1,11 +1,11 @@
 # UME Logging (`logging-ume`)
 
 <p align="left">
-  <a href="https://pypi.org/project/logging-ume/">
-    <img alt="PyPI" src="https://img.shields.io/pypi/v/logging-ume?color=blue">
+  <a href="https://pypi.org/project/ume-logging/">
+    <img alt="PyPI" src="https://img.shields.io/pypi/v/ume-logging?color=blue">
   </a>
-  <a href="https://pypi.org/project/logging-ume/">
-    <img alt="Python Versions" src="https://img.shields.io/pypi/pyversions/logging-ume">
+  <a href="https://pypi.org/project/ume-logging/">
+    <img alt="Python Versions" src="https://img.shields.io/pypi/pyversions/ume-logging">
   </a>
   <a href="https://github.com/UMEssen/ume-logging/blob/main/LICENSE">
     <img alt="License" src="https://img.shields.io/github/license/UMEssen/ume-logging">
