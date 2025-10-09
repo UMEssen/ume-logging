@@ -36,10 +36,10 @@ Uniform JSON logging for **University Medicine Essen** applications.
 ## 📦 Installation
 
 ```bash
-pip install logging-ume
+pip install ume-logging
 # Optional extras:
-pip install "logging-ume[fastapi]"   # FastAPI request logging middleware
-pip install "logging-ume[otel]"      # OpenTelemetry tracing + span events
+pip install "ume-logging[fastapi]"   # FastAPI request logging middleware
+pip install "ume-logging[otel]"      # OpenTelemetry tracing + span events
 ```
 
 ---
