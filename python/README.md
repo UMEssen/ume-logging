@@ -1,4 +1,4 @@
-# UME Logging (`logging-ume`)
+# ume-logging
 
 <p align="left">
   <a href="https://pypi.org/project/ume-logging/">
@@ -10,128 +10,194 @@
   <a href="https://github.com/UMEssen/ume-logging/blob/main/LICENSE">
     <img alt="License" src="https://img.shields.io/github/license/UMEssen/ume-logging">
   </a>
-  <!-- Optionally add CI badge:
-  <a href="https://github.com/UMEssen/ume-logging/actions">
-    <img alt="CI" src="https://github.com/UMEssen/ume-logging/actions/workflows/ci.yml/badge.svg">
-  </a>
-  -->
 </p>
 
-Uniform JSON logging for **University Medicine Essen** applications.  
-
----
+Uniform JSON logging for **University Medicine Essen** applications. Designed for microservices running in Docker/Kubernetes with ELK stack integration.
 
 ## Features
 
-- JSON log output (Docker/K8s/ELK friendly)
-- App/env/service/request context injection
-- PII scrubbing (emails, numeric IDs, phone numbers)
-- OpenTelemetry trace/span IDs in logs
-- Optional log→OTel span event bridge
-- FastAPI middleware for request/response logging
-- Compatible with Python 3.9+
+- **Structured JSON output** — Machine-readable logs for ELK/Loki/CloudWatch
+- **Context injection** — Automatically include app, env, service, request ID in every log
+- **Request tracing** — Track requests across services with `X-Request-ID` propagation
+- **PII scrubbing** — Automatically redact emails and phone numbers from logs
+- **OpenTelemetry integration** — Trace/span IDs in logs + log→span event bridge
+- **FastAPI middleware** — Request/response logging with latency tracking
+- **User privacy** — Hash user identifiers with configurable salt
 
----
-
-## 📦 Installation
+## Installation
 
 ```bash
-pip install logging-ume
-# Optional extras:
-pip install "logging-ume[fastapi]"   # FastAPI request logging middleware
-pip install "logging-ume[otel]"      # OpenTelemetry tracing + span events
+pip install ume-logging
+
+# With FastAPI support
+pip install "ume-logging[fastapi]"
+
+# With OpenTelemetry support
+pip install "ume-logging[otel]"
+
+# Everything
+pip install "ume-logging[fastapi,otel]"
 ```
 
----
-
-## 🚀 Quickstart
+## Quick Start
 
 ```python
 import logging
 from umelogging import log_configure
 
-log_configure("INFO", app="dicom2fhir", env="prod", service="mapping")
+log_configure("INFO", app="patient-api", env="prod", service="fhir-import")
+
 log = logging.getLogger(__name__)
-
-log.info("Starting dicom-to-fhir mapping job.")
+log.info("Processing patient records", extra={"count": 42})
 ```
 
-### Example Output (JSON):
-
+**Output:**
 ```json
-{
-  "time": "2025-08-12T12:01:23.456Z",
-  "level": "INFO",
-  "logger": "myapp",
-  "message": "Starting dicom-to-fhir mapping job.",
-  "org": "UME",
-  "app": "dicom2fhir",
-  "env": "prod",
-  "service": "mapping"
-}
+{"time":"2025-01-15T10:30:00","level":"INFO","logger":"__main__","message":"Processing patient records","org":"UME","app":"patient-api","env":"prod","service":"fhir-import","count":42}
 ```
 
----
+## Context Management
 
-## ⚙️ Environment Variables
+Track requests and users across your application:
 
-| Variable                | Description                          | Default  |
-|-------------------------|--------------------------------------|----------|
-| `UME_LOG_LEVEL`         | Logging level                       | `INFO`   |
-| `UME_APP`               | App name                            |          |
-| `UME_ENV`               | Environment (prod, dev, test)       | `prod`   |
-| `UME_SERVICE`           | Service name                        |          |
-| `UME_COMPONENT`         | Component/module name               |          |
-| `UME_USER_HASH_SALT`    | Salt for user ID hashing            | `ume`    |
-| `UME_OTEL_SPAN_EVENTS`  | Mirror logs as OTel span events     | `false`  |
+```python
+from umelogging import set_context, with_request_id
 
----
+# Set request ID (or auto-generate with with_request_id())
+with_request_id("req-abc-123")
 
-## 🌐 FastAPI Integration (optional)
+# Track user (automatically hashed for privacy)
+set_context(user_id="patient@example.com", component="auth")
 
-Add request/response logging to your FastAPI app:
+# Add custom context
+set_context(extra={"tenant": "hospital-a", "study_id": "ST001"})
+```
+
+All subsequent logs will include this context:
+```json
+{"message":"User authenticated","request_id":"req-abc-123","user":{"hash":"a1b2c3..."},"component":"auth","tenant":"hospital-a"}
+```
+
+## PII Scrubbing
+
+Emails and phone numbers are automatically redacted:
+
+```python
+log.info("Contact: john.doe@hospital.com, Phone: +49 201 723-0")
+# Output: "Contact: [email], Phone: [phone]"
+```
+
+## FastAPI Integration
 
 ```python
 from fastapi import FastAPI
-from umelogging.fastapi.middleware import UMELoggingMiddleware
+from umelogging import log_configure, UMERequestLoggerMiddleware
+
+log_configure("INFO", app="my-api", env="prod")
 
 app = FastAPI()
-app.add_middleware(UMELoggingMiddleware)
+app.add_middleware(UMERequestLoggerMiddleware)
+
+@app.get("/patients/{id}")
+async def get_patient(id: str):
+    return {"id": id}
 ```
 
-This will log incoming requests and responses in JSON, including request ID, latency, status, and correlation information.
+Every request logs:
+```json
+{"message":"request.start","method":"GET","path":"/patients/123","request_id":"550e8400-..."}
+{"message":"request.end","status":200,"duration_ms":45,"request_id":"550e8400-..."}
+```
 
----
+The middleware:
+- Extracts `X-Request-ID` from headers (or generates UUID)
+- Returns `X-Request-ID` in response headers
+- Measures request latency
+- Sets `component` context to `"http"`
 
-## 📈 OpenTelemetry Integration (optional)
+## OpenTelemetry Integration
 
-Enable OpenTelemetry tracing and span events in your logs:
+### Add Trace IDs to Logs
+
+When OpenTelemetry is configured, trace and span IDs are automatically added to every log:
+
+```json
+{"message":"Processing","trace_id":"0af7651916cd43dd8448eb211c80319c","span_id":"b7ad6b7169203331"}
+```
+
+### Setup Tracing
 
 ```python
-from umelogging import log_configure
+from umelogging.otel.handler import setup_otel_tracing
 
-log_configure(
-    "INFO",
-    app="myapp",
-    env="prod",
-    otel_enable=True,  # Enable OpenTelemetry
-    otel_exporter="otlp",  # or "console"
+setup_otel_tracing(
+    service_name="patient-api",
+    otlp_endpoint="http://otel-collector:4318",
+    sampling_ratio=0.1,  # Sample 10% of traces
 )
 ```
 
-Configure via environment variables:
+### Mirror Logs to Span Events
 
-| Variable                     | Description                       | Example             |
-|------------------------------|-----------------------------------|---------------------|
-| `UMELOG_OTEL_ENABLE`         | Enable OTel tracing/log bridge    | `true`              |
-| `UMELOG_OTEL_EXPORTER`       | OTel exporter ("otlp", "console") | `otlp`             |
-| `OTEL_EXPORTER_OTLP_ENDPOINT`| OTel collector endpoint           | `http://otel:4317`  |
+Attach logs as events on the current trace span:
 
-See [OpenTelemetry Docs](https://opentelemetry.io/docs/) for advanced setup.
+```python
+import logging
+from umelogging.otel.handler import OTelSpanEventHandler
 
----
+logging.getLogger().addHandler(OTelSpanEventHandler())
+```
 
-## 📄 License
+## Environment Variables
 
-MIT License.  
-Copyright © University Medicine Essen ZIT / IKIM.
+### Core Configuration
+
+| Variable             | Description                   | Default |
+|----------------------|-------------------------------|---------|
+| `UME_LOG_LEVEL`      | Logging level                 | `INFO`  |
+| `UME_APP`            | Application name              |         |
+| `UME_ENV`            | Environment (prod/dev/test)   | `prod`  |
+| `UME_SERVICE`        | Service name                  |         |
+| `UME_COMPONENT`      | Component/module name         |         |
+| `UME_USER_HASH_SALT` | Salt for user ID hashing      | `ume`   |
+
+### OpenTelemetry Configuration
+
+| Variable                       | Description                | Default                 |
+|--------------------------------|----------------------------|-------------------------|
+| `OTEL_SERVICE_NAME`            | Service name for traces    | `ume-service`           |
+| `OTEL_EXPORTER_OTLP_ENDPOINT`  | Collector endpoint         | `http://localhost:4318` |
+| `OTEL_EXPORTER_OTLP_HEADERS`   | Headers (`key=val,k2=v2`)  |                         |
+| `OTEL_TRACES_SAMPLER_ARG`      | Sampling ratio (0.0-1.0)   | `1.0`                   |
+
+## API Reference
+
+### `log_configure(level, *, app, env, service, component, stream, static_fields, propagate_existing)`
+
+Configure the root logger with JSON formatting and PII filtering.
+
+### `set_context(*, app, env, service, component, request_id, user_id, extra)`
+
+Set context variables that are included in all subsequent logs.
+
+### `with_request_id(request_id=None) -> str`
+
+Set or generate a request ID. Returns the ID.
+
+### `get_context() -> dict`
+
+Get current context as a dictionary.
+
+## Development
+
+```bash
+# Install with dev dependencies
+pip install -e ".[dev]"
+
+# Run tests
+pytest tests/ -v
+```
+
+## License
+
+MIT License — Copyright © University Medicine Essen
