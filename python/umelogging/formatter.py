@@ -9,7 +9,7 @@ import pytz
 def _try_parse_datetime(s: str) -> Union[datetime, str]:
     try:
         return parse(s)
-    except (ValueError, TypeError):
+    except (ValueError, TypeError, OverflowError):
         for fmt in ("%Y%m%d%H%M%S.%f", "%Y%m%d%H%M%S", "%Y-%m-%dT%H:%M:%S.%f", "%Y-%m-%dT%H:%M:%S"):
             try:
                 return datetime.strptime(s, fmt)
