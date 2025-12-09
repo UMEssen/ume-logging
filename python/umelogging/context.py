@@ -9,7 +9,7 @@ service_var = contextvars.ContextVar("ume_service", default=os.getenv("UME_SERVI
 component_var = contextvars.ContextVar("ume_component", default="")
 request_id_var = contextvars.ContextVar("ume_request_id", default="")
 user_hash_var = contextvars.ContextVar("ume_user_hash", default="")
-extra_var = contextvars.ContextVar("ume_extra", default={})
+extra_var = contextvars.ContextVar("ume_extra", default=None)
 
 def set_context(*, app: Optional[str]=None, env: Optional[str]=None,
                 service: Optional[str]=None, component: Optional[str]=None,
@@ -22,7 +22,7 @@ def set_context(*, app: Optional[str]=None, env: Optional[str]=None,
     if request_id is not None: request_id_var.set(request_id)
     if user_id is not None:
         user_hash_var.set(_stable_hash(user_id))
-    if extra: extra_var.set({**extra_var.get(), **extra})
+    if extra: extra_var.set({**(extra_var.get() or {}), **extra})
 
 def update_context(**kwargs) -> None:
     set_context(**kwargs)

@@ -1,19 +1,19 @@
 # Purpose: Structured JSON formatter with safe datetime handling
 
 import logging, json
-from typing import Any, Dict
+from typing import Any, Dict, Union
 from datetime import datetime
 from dateutil.parser import parse
 import pytz
 
-def _try_parse_datetime(s: str):
+def _try_parse_datetime(s: str) -> Union[datetime, str]:
     try:
         return parse(s)
-    except Exception:
+    except (ValueError, TypeError):
         for fmt in ("%Y%m%d%H%M%S.%f", "%Y%m%d%H%M%S", "%Y-%m-%dT%H:%M:%S.%f", "%Y-%m-%dT%H:%M:%S"):
             try:
                 return datetime.strptime(s, fmt)
-            except Exception:
+            except ValueError:
                 pass
     return s
 
@@ -49,7 +49,7 @@ class JsonFormatter(logging.Formatter):
         try:
             from opentelemetry import trace as _trace  # type: ignore
             self._tracer = _trace
-        except Exception:
+        except ImportError:
             self._tracer = None
 
     def format(self, record: logging.LogRecord) -> str:
