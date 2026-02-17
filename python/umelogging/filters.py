@@ -21,6 +21,7 @@ class PiiScrubberFilter(logging.Filter):
     def filter(self, record: logging.LogRecord) -> bool:
         try:
             record.msg = _mask(str(record.getMessage()))
+            record.args = None
         except Exception:
             pass
         return True

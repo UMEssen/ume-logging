@@ -1,10 +1,13 @@
 # Purpose: Structured JSON formatter with safe datetime handling
 
-import logging, json
-from typing import Any, Dict, Union
+import json
+import logging
 from datetime import datetime
-from dateutil.parser import parse
+from typing import Any, Dict, Union
+
 import pytz
+from dateutil.parser import parse
+
 
 def _try_parse_datetime(s: str) -> Union[datetime, str]:
     try:
@@ -52,6 +55,20 @@ class JsonFormatter(logging.Formatter):
         except ImportError:
             self._tracer = None
 
+    @staticmethod
+    def _safe_get_message(record: logging.LogRecord) -> str:
+        """Extract message from log record, handling %-style formatting failures.
+
+        Libraries like uvicorn and httpx use positional-arg logging
+        (e.g. logger.info("msg %s %d", arg1, arg2)) which can fail under
+        getMessage() when msg contains stray % characters or arg counts
+        mismatch. Fall back to str(record.msg) to avoid crashing the formatter.
+        """
+        try:
+            return record.getMessage()
+        except (TypeError, ValueError):
+            return str(record.msg)
+
     def format(self, record: logging.LogRecord) -> str:
         from .context import get_context  # local import avoids cycle
 
@@ -60,7 +77,7 @@ class JsonFormatter(logging.Formatter):
             "time": self.formatTime(record),
             "level": record.levelname,
             "logger": record.name,
-            "message": record.getMessage(),
+            "message": self._safe_get_message(record),
             **self.static,
             **{k: v for k, v in ctx.items() if v is not None},
         }
