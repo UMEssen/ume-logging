@@ -1,20 +1,30 @@
 import json
 import logging
-import pytest
+import os
 from datetime import datetime
 from unittest.mock import MagicMock, patch
+
+import pytest
 import pytz
 
+from umelogging.context import (
+    app_var,
+    component_var,
+    env_var,
+    extra_var,
+    request_id_var,
+    service_var,
+    set_context,
+    user_hash_var,
+)
 from umelogging.formatter import (
-    _try_parse_datetime,
+    JsonFormatter,
     _datetime_hook,
     _DateTimeEncoder,
-    safe_json_dumps,
+    _try_parse_datetime,
     parse_timezone,
-    JsonFormatter,
+    safe_json_dumps,
 )
-from umelogging.context import set_context, extra_var, app_var, env_var, service_var, component_var, request_id_var, user_hash_var
-import os
 
 
 @pytest.fixture(autouse=True)
@@ -255,3 +265,51 @@ class TestJsonFormatter:
         parsed = json.loads(result)
         # Should still be valid JSON without org field
         assert "message" in parsed
+
+    def test_handles_percent_style_args_mismatch(self, formatter):
+        """Libraries like uvicorn/httpx use logger.info(msg, *args) with %-style
+        formatting that can fail under getMessage(). The formatter must not crash."""
+        record = logging.LogRecord(
+            name="uvicorn.error",
+            level=logging.INFO,
+            pathname="server.py",
+            lineno=92,
+            msg="Started server process [%d]",
+            args=(1,),
+            exc_info=None,
+        )
+        result = formatter.format(record)
+        parsed = json.loads(result)
+        assert parsed["message"] == "Started server process [1]"
+
+    def test_handles_percent_style_args_too_many(self, formatter):
+        """When args count exceeds format placeholders, getMessage() raises TypeError."""
+        record = logging.LogRecord(
+            name="httpx",
+            level=logging.INFO,
+            pathname="client.py",
+            lineno=10,
+            msg='HTTP Request: POST http://example.com "HTTP/1.1 200 OK"',
+            args=("POST", "http://example.com", "HTTP/1.1", 200, "OK"),
+            exc_info=None,
+        )
+        result = formatter.format(record)
+        parsed = json.loads(result)
+        # Falls back to str(record.msg) since %-formatting fails
+        assert "HTTP Request" in parsed["message"]
+        assert isinstance(parsed["message"], str)
+
+    def test_handles_percent_style_args_type_error(self, formatter):
+        """When msg is not a string format pattern, getMessage() raises TypeError."""
+        record = logging.LogRecord(
+            name="test",
+            level=logging.INFO,
+            pathname="test.py",
+            lineno=10,
+            msg="No placeholders here",
+            args=("unexpected_arg",),
+            exc_info=None,
+        )
+        result = formatter.format(record)
+        parsed = json.loads(result)
+        assert parsed["message"] == "No placeholders here"

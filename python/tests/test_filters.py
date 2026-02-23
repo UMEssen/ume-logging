@@ -140,6 +140,37 @@ class TestPiiScrubberFilter:
         # getMessage() should be called and masked
         assert "[email]" in record.msg
 
+    def test_clears_args_after_formatting(self, filter):
+        """Args must be cleared after getMessage() to prevent double-formatting."""
+        record = logging.LogRecord(
+            name="docling.models.factories",
+            level=logging.INFO,
+            pathname="base_factory.py",
+            lineno=112,
+            msg="Loading plugin %r",
+            args=("docling_defaults",),
+            exc_info=None,
+        )
+        filter.filter(record)
+        assert record.args is None
+        # Subsequent getMessage() must not crash
+        assert record.getMessage() == "Loading plugin 'docling_defaults'"
+
+    def test_clears_args_with_list_argument(self, filter):
+        """Reproduces the exact docling crash: %r with a list arg."""
+        record = logging.LogRecord(
+            name="docling.models.factories",
+            level=logging.INFO,
+            pathname="__init__.py",
+            lineno=28,
+            msg="Registered ocr engines: %r",
+            args=(["easyocr", "tesserocr", "rapidocr"],),
+            exc_info=None,
+        )
+        filter.filter(record)
+        assert record.args is None
+        assert "easyocr" in record.msg
+
     def test_handles_exception_gracefully(self, filter):
         """Filter should not raise even with problematic records."""
         record = logging.LogRecord(
