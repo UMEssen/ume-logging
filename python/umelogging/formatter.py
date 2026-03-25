@@ -3,7 +3,7 @@
 import json
 import logging
 from datetime import datetime
-from typing import Any, Dict, Union
+from typing import Any, Dict, Optional, Union
 
 import pytz
 from dateutil.parser import parse
@@ -44,7 +44,7 @@ def parse_timezone(tz_name: str) -> pytz.BaseTzInfo:
 
 class JsonFormatter(logging.Formatter):
     # Purpose: emit ECS-ish JSON with UME context, OTEL trace, and exception details
-    def __init__(self, *, static_fields: Dict[str, Any] | None = None):
+    def __init__(self, *, static_fields: Optional[Dict[str, Any]] = None):
         super().__init__()
         self.static = static_fields or {}
 

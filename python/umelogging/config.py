@@ -1,7 +1,7 @@
 # Purpose: One-call configuration for consistent JSON logs across UME
 
 import logging, os, sys
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Union
 from .formatter import JsonFormatter
 from .filters import PiiScrubberFilter
 from .context import set_context
@@ -19,7 +19,7 @@ def _build_handlers(stream: Any, static_fields: Dict[str, Any]) -> List[logging.
     return [h]
 
 def log_configure(
-    level: str | int = "INFO",
+    level: Union[str, int] = "INFO",
     *,
     app: Optional[str] = None,
     env: Optional[str] = None,
